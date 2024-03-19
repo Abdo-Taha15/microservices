@@ -1,0 +1,10 @@
+paddlepaddle-gpu -i https://pypi.tuna.tsinghua.edu.cn/simple
+"paddleocr>=2.0.1"
+pika
+google-cloud-storage
+python-dotenv
+sqlmodel
+SQLAlchemy-Utils
+sqlalchemy-json
+python-multipart
+pdf2image

@@ -1,0 +1,9 @@
+fastapi
+"uvicorn[standard]"
+psycopg2-binary
+python-dotenv
+sqlmodel
+SQLAlchemy-Utils
+pika
+sqlalchemy-json
+python-multipart
