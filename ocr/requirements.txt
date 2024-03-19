@@ -1,5 +1,6 @@
 paddlepaddle-gpu -i https://pypi.tuna.tsinghua.edu.cn/simple
 "paddleocr>=2.0.1"
+tensorflow
 pika
 google-cloud-storage
 python-dotenv

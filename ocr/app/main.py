@@ -13,7 +13,7 @@ from models import DeRequests, Status
 from GCP import download
 from crud import _get_request_from_hash, _update_de_request
 from tools import _commit_transaction, hash_file, get_img
-from process import extract_text, get_threshold, prepare_rows
+from process import extract_text, get_data
 
 load_dotenv()
 
@@ -69,7 +69,8 @@ def main():
                     session.refresh(de_request)
                     print("Failed to download file from GCS", err.__str__())
                 try:
-                    result = extract_text(get_img(file))
+                    img = get_img(file)
+                    result = extract_text(img)
                     with open("raw_text.txt", "w") as f:
                         f.write("\n".join([line[1][0] for line in result]))
                     de_request = _update_de_request(
@@ -98,21 +99,17 @@ def main():
                     print("Failed to extract text from file", err.__str__())
                     return
                 try:
-                    threshold = get_threshold(result)
-                    rows, _ = prepare_rows(result, threshold)
+                    # threshold = get_threshold(result)
+                    processed_output = get_data(img, result)
                     with open("processed_text.txt", "w") as f:
-                        f.write(
-                            "\n".join(
-                                [" ".join(text[1][0] for text in row) for row in rows]
-                            )
-                        )
+                        f.write("\n".join(text for text in processed_output))
                     de_request = _update_de_request(
                         de_request,
                         {
                             "ocr_status": Status.COMPLETED,
                             "status_message": "Finished processing raw ocr",
                             "processed_ocr": "\n".join(
-                                [" ".join(text[1][0] for text in row) for row in rows]
+                                text for text in processed_output
                             ),
                         },
                         session,
