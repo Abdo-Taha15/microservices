@@ -46,6 +46,18 @@ async def set_connection():
     channel = connection.channel()
 
     channel.queue_declare(queue="ocr_queue", durable=True)
-    channel.queue_declare(queue="data_extracsion", durable=True)
+    channel.queue_declare(queue="data_extraction", durable=True)
 
-    return connection, channel
+    connection.close()
+
+
+def get_channel():
+    credentials = pika.PlainCredentials(
+        os.getenv("RABBITMQ_USER"), os.getenv("RABBITMQ_PASSWORD")
+    )
+    connection = pika.BlockingConnection(
+        pika.ConnectionParameters(
+            os.getenv("RABBITMQ_HOST"), os.getenv("RABBITMQ_PORT"), "/", credentials
+        )
+    )
+    return connection, connection.channel()

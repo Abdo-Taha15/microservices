@@ -9,9 +9,13 @@ from datetime import datetime
 
 class Status(enum.Enum):
     PENDING = "PENDING"
-    IN_PROGRESS = "IN_PROGRESS"
+    IN_PROGRESS = "IN PROGRESS"
     FAILED = "FAILED"
     COMPLETED = "COMPLETED"
+
+    @classmethod
+    def list(cls):
+        return list(map(lambda c: c.value, cls))
 
 
 class DeRequests(SQLModel, table=True):

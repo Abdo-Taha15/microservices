@@ -1,7 +1,7 @@
 from sqlmodel import select, Session
 
-from models import DeRequests
-from tools import _commit_transaction
+from .models import DeRequests, Status
+from .tools import _commit_transaction
 
 
 def _create_de_request(data: dict, session: Session):
@@ -23,9 +23,23 @@ def _get_request_from_id(id: int, session: Session):
 
 
 def _update_de_request(de_request: DeRequests, data: dict, session: Session):
+
+    def __update_status(value: str, de_request: DeRequests):
+        if value == "PENDING":
+            setattr(de_request, key, Status.PENDING)
+        elif value == "IN PROGRESS":
+            setattr(de_request, key, Status.IN_PROGRESS)
+        elif value == "FAILED":
+            setattr(de_request, key, Status.FAILED)
+        elif value == "COMPLETED":
+            setattr(de_request, key, Status.COMPLETED)
+
     for key, value in data.items():
         if value:
-            setattr(de_request, key, value)
+            if value in Status.list():
+                __update_status(value, de_request)
+            else:
+                setattr(de_request, key, value)
 
     _commit_transaction(de_request, session)
 

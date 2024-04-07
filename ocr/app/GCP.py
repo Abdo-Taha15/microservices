@@ -1,5 +1,3 @@
-import os
-import pathlib
 from typing import BinaryIO
 from google.cloud import storage
 
