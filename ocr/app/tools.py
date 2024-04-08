@@ -13,7 +13,7 @@ def get_img(uploaded_file):
 def convert_pdf_to_image(filename):
     # * returns back a list of images according to the pdf pages
     pdf_pages = convert_from_bytes(filename, 500)
-    return pdf_pages
+    return [np.asarray(page) for page in pdf_pages]
 
 
 def filter_color(img, lower_val, upper_val):

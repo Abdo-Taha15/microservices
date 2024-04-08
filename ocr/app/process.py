@@ -11,6 +11,16 @@ def extract_text(img):
     return result[0]
 
 
+def get_raw_text_from_pages(pages):
+    raw_text = {}
+    results = []
+    for page_num, page in enumerate(pages, start=1):
+        result = extract_text(page)
+        results.append((page, result))
+        raw_text[page_num] = "\n".join([line[1][0] for line in result])
+    return results, raw_text
+
+
 def intersection(box_1, box_2):
     return [box_2[0], box_1[1], box_2[2], box_1[3]]
 
@@ -101,7 +111,10 @@ def get_data(img, output):
     return out_array
 
 
-def is_valid(line: str, text: str):
-    if line.lower().find(f"{text}") == -1:
-        return False
-    return True
+def get_processed_text_from_pages(results):
+    processed_text = {}
+    for page_num, (img, result) in enumerate(results, start=1):
+        output = get_data(img, result)
+        processed_text[page_num] = "\n".join(text for text in output)
+
+    return processed_text

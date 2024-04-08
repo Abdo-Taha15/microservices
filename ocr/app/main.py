@@ -12,8 +12,8 @@ from config import engine
 from models import Status
 from GCP import download
 from crud import _get_request_from_hash
-from tools import get_img
-from process import extract_text, get_data
+from tools import get_img, convert_pdf_to_image
+from process import get_raw_text_from_pages, get_processed_text_from_pages
 
 load_dotenv()
 
@@ -70,13 +70,18 @@ def main():
                 print("Failed to download file from GCS", err.__str__())
                 return
             try:
-                img = get_img(file)
-                result = extract_text(img)
+                if de_request.original_filename.split(".")[-1].lower() != "pdf":
+                    img = get_img(file)
+                    pages = [img]
+                else:
+                    pages = convert_pdf_to_image(file)
+
+                results, raw_text = get_raw_text_from_pages(pages)
                 requests.put(
                     f"{os.getenv('GATEWAY_URL')}/ocr/",
                     json={
                         "status_message": "Finished extracting raw ocr",
-                        "raw_ocr": "\n".join([line[1][0] for line in result]),
+                        "raw_ocr": raw_text,
                     },
                     params={"request_id": de_request.id},
                     headers=headers,
@@ -96,13 +101,13 @@ def main():
                 print("Failed to extract text from file", err.__str__())
                 return
             try:
-                processed_output = get_data(img, result)
+                processed_text = get_processed_text_from_pages(results)
                 requests.put(
                     f"{os.getenv('GATEWAY_URL')}/ocr/",
                     json={
                         "ocr_status": Status.COMPLETED.value,
                         "status_message": "Finished processing raw ocr",
-                        "processed_ocr": "\n".join(text for text in processed_output),
+                        "processed_ocr": processed_text,
                     },
                     params={"request_id": de_request.id},
                     headers=headers,
