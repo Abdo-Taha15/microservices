@@ -29,12 +29,18 @@ class DeRequests(SQLModel, table=True):
         sa_column=Column(mutable_json_type(dbtype=JSONB, nested=True))
     )
     ocr_model: str = Field(default=None, nullable=True)
-    raw_ocr: str = Field(sa_column=Column(TEXT, default=None, nullable=True))
-    processed_ocr: str = Field(sa_column=Column(TEXT, default=None, nullable=True))
+    raw_ocr: dict = Field(
+        sa_column=Column(mutable_json_type(dbtype=JSONB, nested=True))
+    )
+    processed_ocr: dict = Field(
+        sa_column=Column(mutable_json_type(dbtype=JSONB, nested=True))
+    )
     llm_model: str = Field(default=None, nullable=True)
     de_prompt: str = Field(sa_column=Column(TEXT, default=None, nullable=True))
-    raw_de: str = Field(sa_column=Column(TEXT, default=None, nullable=True))
-    processed_de: str = Field(sa_column=Column(TEXT, default=None, nullable=True))
+    raw_de: dict = Field(sa_column=Column(mutable_json_type(dbtype=JSONB, nested=True)))
+    processed_de: dict = Field(
+        sa_column=Column(mutable_json_type(dbtype=JSONB, nested=True))
+    )
     ocr_status: Optional[Status] = Field(
         sa_column=Column(Enum(Status), nullable=False, default=Status.PENDING)
     )
