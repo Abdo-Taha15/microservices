@@ -19,12 +19,12 @@ from app.crud import (
 from app.tools import hash_file
 
 router = APIRouter(
-    prefix="/ocr", tags=["ocr"], responses={404: {"description": "Not found"}}
+    prefix="/process", tags=["process"], responses={404: {"description": "Not found"}}
 )
 
 
 @router.post("")
-async def ocr(
+async def process_file(
     request: Request,
     file: UploadFile = File(...),
     session: Session = Depends(get_session),
@@ -95,7 +95,7 @@ async def ocr(
 
 
 @router.put("/")
-async def update_ocr_request(
+async def update_process_request(
     request: Request,
     request_id: int,
     data: dict,

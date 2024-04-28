@@ -9,3 +9,4 @@ SQLAlchemy-Utils
 sqlalchemy-json
 python-multipart
 pdf2image
+requests

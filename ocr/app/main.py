@@ -38,26 +38,25 @@ def main():
 
             if not de_request:
                 print("Request not found")
-                ch.basic_nack(delivery_tag=method.delivery_tag)
                 return
 
             try:
                 file = download(de_request.unique_filename)
                 requests.put(
-                    f"{os.getenv('GATEWAY_URL')}/ocr/",
+                    f"{os.getenv('GATEWAY_URL')}/process/",
                     json={
                         "status": Status.IN_PROGRESS.value,
                         "ocr_model": "paddleocr",
                         "ocr_status": Status.IN_PROGRESS.value,
                         "status_message": "started progressing the file",
-                        "num_or_retry": de_request.num_or_retry + 1,
+                        "num_of_ocr_retry": de_request.num_of_ocr_retry + 1,
                     },
                     params={"request_id": de_request.id},
                     headers=headers,
                 )
             except Exception as err:
                 requests.put(
-                    f"{os.getenv('GATEWAY_URL')}/ocr/",
+                    f"{os.getenv('GATEWAY_URL')}/process/",
                     json={
                         "ocr_status": Status.FAILED.value,
                         "status": Status.FAILED.value,
@@ -66,7 +65,6 @@ def main():
                     params={"request_id": de_request.id},
                     headers=headers,
                 )
-                ch.basic_nack(delivery_tag=method.delivery_tag)
                 print("Failed to download file from GCS", err.__str__())
                 return
             try:
@@ -78,7 +76,7 @@ def main():
 
                 results, raw_text = get_raw_text_from_pages(pages)
                 requests.put(
-                    f"{os.getenv('GATEWAY_URL')}/ocr/",
+                    f"{os.getenv('GATEWAY_URL')}/process/",
                     json={
                         "status_message": "Finished extracting raw ocr",
                         "raw_ocr": raw_text,
@@ -88,7 +86,7 @@ def main():
                 )
             except Exception as err:
                 requests.put(
-                    f"{os.getenv('GATEWAY_URL')}/ocr/",
+                    f"{os.getenv('GATEWAY_URL')}/process/",
                     json={
                         "ocr_status": Status.FAILED.value,
                         "status": Status.FAILED.value,
@@ -97,13 +95,12 @@ def main():
                     params={"request_id": de_request.id},
                     headers=headers,
                 )
-                ch.basic_nack(delivery_tag=method.delivery_tag, requeue=True)
                 print("Failed to extract text from file", err.__str__())
                 return
             try:
                 processed_text = get_processed_text_from_pages(results)
                 requests.put(
-                    f"{os.getenv('GATEWAY_URL')}/ocr/",
+                    f"{os.getenv('GATEWAY_URL')}/process/",
                     json={
                         "ocr_status": Status.COMPLETED.value,
                         "status_message": "Finished processing raw ocr",
@@ -114,7 +111,7 @@ def main():
                 )
             except Exception as err:
                 requests.put(
-                    f"{os.getenv('GATEWAY_URL')}/ocr/",
+                    f"{os.getenv('GATEWAY_URL')}/process/",
                     json={
                         "ocr_status": Status.FAILED.value,
                         "status": Status.FAILED.value,
@@ -123,8 +120,30 @@ def main():
                     params={"request_id": de_request.id},
                     headers=headers,
                 )
-                ch.basic_nack(delivery_tag=method.delivery_tag, requeue=True)
                 print("Failed to extract text from file", err.__str__())
+                return
+
+            try:
+                message = {"request_id": de_request.id}
+                ch.basic_publish(
+                    exchange="",
+                    routing_key=os.getenv("DE_QUEUE"),
+                    body=json.dumps(message),
+                    properties=pika.BasicProperties(
+                        delivery_mode=pika.spec.PERSISTENT_DELIVERY_MODE
+                    ),
+                )
+            except:
+                requests.put(
+                    f"{os.getenv('GATEWAY_URL')}/process/",
+                    json={
+                        "status": Status.FAILED.value,
+                        "status_message": "Failed to push message to de queue",
+                    },
+                    params={"request_id": de_request.id},
+                    headers=headers,
+                )
+                print("Failed to push message to de queue", err.__str__())
                 return
 
     channel.basic_consume(

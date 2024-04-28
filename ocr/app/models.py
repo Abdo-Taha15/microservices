@@ -47,7 +47,7 @@ class DeRequests(SQLModel, table=True):
     de_status: Optional[Status] = Field(
         sa_column=Column(Enum(Status), nullable=False, default=Status.PENDING)
     )
-    num_or_retry: int = Field(default=0)
+    num_of_retry: int = Field(default=0)
     status: Optional[Status] = Field(
         sa_column=Column(Enum(Status), nullable=False, default=Status.PENDING)
     )

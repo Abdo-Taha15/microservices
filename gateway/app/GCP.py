@@ -55,15 +55,15 @@ class GCStorage:
         return self.client.list_blobs(bucket_name)
 
 
-storage_client = storage.Client(project="binery-ocr-dev")
+storage_client = storage.Client(project="tenaga-eca-mvp")
 gcs = GCStorage(storage_client)
 
-if not "binery_ocr_bucket" in gcs.list_buckets():
+if not "dev_ocr_bucket" in gcs.list_buckets():
     bucket_gcs = gcs.create_bucket(
-        "binery_ocr_bucket", "binery-ocr-dev", STORAGE_CLASSES[0]
+        "dev_ocr_bucket", "tenaga-eca-mvp", STORAGE_CLASSES[0]
     )
 else:
-    bucket_gcs = gcs.get_bucket("binery_ocr_bucket")
+    bucket_gcs = gcs.get_bucket("dev_ocr_bucket")
 
 
 def upload(file: BinaryIO, filename: str, content_type: str | None):

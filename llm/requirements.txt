@@ -1,0 +1,7 @@
+llama-cpp-python
+pika
+python-dotenv
+sqlmodel
+sqlalchemy-json
+requests
+huggingface-hub
