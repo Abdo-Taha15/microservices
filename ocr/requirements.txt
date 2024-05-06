@@ -1,5 +1,5 @@
-paddlepaddle-gpu -i https://pypi.tuna.tsinghua.edu.cn/simple
-"paddleocr>=2.0.1"
+paddlepaddle-gpu==2.6.1.post120 -f https://www.paddlepaddle.org.cn/whl/linux/cudnnin/stable.html
+paddleocr>=2.0.1
 tensorflow
 pika
 google-cloud-storage

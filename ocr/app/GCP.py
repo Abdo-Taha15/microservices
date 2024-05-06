@@ -1,3 +1,4 @@
+import os
 from typing import BinaryIO
 from google.cloud import storage
 
@@ -52,16 +53,18 @@ class GCStorage:
     def list_blobs(self, bucket_name):
         return self.client.list_blobs(bucket_name)
 
+project = os.getenv("GCP_PROJECT")
+bucket_name = os.getenv("GCP_BUCKET_NAME")
 
-storage_client = storage.Client(project="binery-ocr-dev")
+storage_client = storage.Client(project=project)
 gcs = GCStorage(storage_client)
 
-if not "binery_ocr_bucket" in gcs.list_buckets():
+if not bucket_name in gcs.list_buckets():
     bucket_gcs = gcs.create_bucket(
-        "binery_ocr_bucket", "binery-ocr-dev", STORAGE_CLASSES[0]
+        bucket_name, project, STORAGE_CLASSES[0]
     )
 else:
-    bucket_gcs = gcs.get_bucket("binery_ocr_bucket")
+    bucket_gcs = gcs.get_bucket(bucket_name)
 
 
 def upload(file: BinaryIO, filename: str, content_type: str | None):
